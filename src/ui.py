@@ -10,9 +10,13 @@ class area:
         self.child = []
 
         #handle_event must be set after the creation of the object
+        @self.set_handle_event
         def handle_event(self, event):
             return event
-        self.handle_event = handle_event
+
+        @self.set_draw
+        def draw(self):
+            pass
 
     def add_child(self, child):
         self.child.append(child)
@@ -27,3 +31,8 @@ class area:
         #return the event for propagation
         return event
 
+    def set_handle_event(self, func):
+        self.handle_event = func
+
+    def set_draw(self, func):
+        self.draw = func
