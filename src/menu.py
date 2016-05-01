@@ -143,6 +143,13 @@ class draw_area:
                 if event["button"] == 1:
                     self.map.add_tile(randint(0,10), randint(0,10), tile_bar.get_selection())
                     return None
+
+            #did we resize
+            if event["type"] == "resize":
+                self.area.sx = event["x"]
+                self.area.sy = event["y"]
+                return event
+
             #propagate the rest of the events
             return event
 
