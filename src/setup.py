@@ -10,14 +10,14 @@ def setup(window):
             return event
         return event
 
-
-    #add the tile bar to the window
-    window.tile_bar = menu.tile_bar()
-    window.window_area.add_child(window.tile_bar.area)
-
     #add the drawing area to the window
     window.draw_area = menu.draw_area()
     window.window_area.add_child(window.draw_area.area)
+
+    #add the tile bar to the window
+    window.tile_bar = menu.tile_bar()
+    window.draw_area.area.add_child(window.tile_bar.area)
+
 
     @window.event
     def on_draw():
