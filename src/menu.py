@@ -1,14 +1,22 @@
 import pyglet
 import gfx
+import map
 import ui
 from random import randint
 
+#this class defines all the right side tile bar
+#including the addition of new tiles, cloning them
+#and changing the palettes for palette tiles
 class tile_bar:
+    #selection of the tile
+    select = -1;
+    #hold instance for static access
+    instance = None
+
     def __init__(self):
+        tile_bar.instance = self
         #list of all available tiles
         self.tiles = []
-        #selection of the tile
-        self.select = -1
 
         #tile selection image
         self.selection = pyglet.image.load("img/selection.png")
@@ -27,7 +35,6 @@ class tile_bar:
                 if event_self.is_inside(event):
                     #is the button released the left one
                     if event["button"] == 1:
-                        print("asdfadsfsa")
                         self.add_new_tile()
                         #consume the event
                         return None
@@ -72,16 +79,19 @@ class tile_bar:
 
             #see what tile was selected
             if event["type"] == "release":
+                #see if the click was made inside the area
                 if event_self.is_inside(event):
-                    y = event["y"]
-                    self.select = int((self.area.sy - y + self.scroll)/128)
-                    if(self.select < 0):
-                        self.select = 0
-                    if(self.select >= len(self.tiles)):
-                        self.select = len(self.tiles)-1
+                    #is the button pressed the left one
+                    if event["button"] == 1:
+                        y = event["y"]
+                        tile_bar.select = int((self.area.sy - y + self.scroll)/128)
+                        if(tile_bar.select < 0):
+                            tile_bar.select = 0
+                        if(tile_bar.select >= len(self.tiles)):
+                            tile_bar.select = len(self.tiles)-1
 
-                    #consume the event
-                    return None
+                        #consume the event
+                        return None
 
             #return other event to be treated by other areas
             return event
@@ -100,14 +110,42 @@ class tile_bar:
         #add the new tile to the rest
         self.tiles.append(tile)
 
-    def get_selection(self):
-        if self.selection == -1:
+    def get_selection():
+        if tile_bar.select == -1:
             return None
 
-        return self.tiles[self.selection]
+        return tile_bar.instance.tiles[tile_bar.select]
 
     def draw(self):
         for i in range(len(self.tiles)):
             self.tiles[i].draw(self.area.x, self.area.sy + self.scroll - (i+1)*128, 128)
-        self.selection.blit(self.area.x, self.area.sy + self.scroll - (self.select+1)*128)
+        self.selection.blit(self.area.x, self.area.sy + self.scroll - (tile_bar.select+1)*128)
         self.button.blit(self.area.x, 0)
+
+
+
+#this class defines the drawing area of the editor
+class draw_area:
+    def __init__(self):
+        self.map = map.test_map()
+
+        self.area = ui.area(0,0, 800,600)
+
+        @self.area.set_handle_event
+        def handle_event(event_self, event):
+            if event is None:
+                return event
+
+            #see if the area was clicked
+            if event["type"] == "release":
+                #it's always inside
+                #see if the button is the left one
+                if event["button"] == 1:
+                    self.map.add_tile(randint(0,10), randint(0,10), tile_bar.get_selection())
+                    return None
+            #propagate the rest of the events
+            return event
+
+
+    def draw(self):
+        self.map.draw(0,0, 10)

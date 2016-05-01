@@ -8,6 +8,9 @@ class test_map:
         self.tiles = []
 
     def add_tile(self, x, y, tile):
+        #see if we got a valid tile
+        if tile is None:
+            return
         #find if we can add the tile
         for t in self.tiles:
             if t[1] == x and t[2] == y:
@@ -28,4 +31,4 @@ class test_map:
             #draw everytile offset to it's position
             tile[0].draw(x + tile[1] * pixel_size * gfx.tile_size,
                          y + tile[2] * pixel_size * gfx.tile_size,
-                         pixel_size) 
+                         pixel_size * gfx.tile_size) 
