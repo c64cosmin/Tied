@@ -7,6 +7,8 @@ class tile_bar:
     def __init__(self):
         #list of all available tiles
         self.tiles = []
+        #selection of the tile
+        self.select = -1
 
         #tile selection image
         self.selection = pyglet.image.load("img/selection.png")
@@ -21,11 +23,14 @@ class tile_bar:
 
             #is the button clicked
             if event["type"] == "release":
-                #is the button released the left one
-                if event["button"] == 1:
-                    self.add_new_tile()
-                    #consume the event
-                    return None
+                #is the event inside the area
+                if event_self.is_inside(event):
+                    #is the button released the left one
+                    if event["button"] == 1:
+                        print("asdfadsfsa")
+                        self.add_new_tile()
+                        #consume the event
+                        return None
 
             #return other event to be treated by other areas
             return event
@@ -48,17 +53,32 @@ class tile_bar:
                 self.area.x = event["x"] - self.area.sx
                 self.area.sy = event["y"]
 
+                self.button_area.x = event["x"] - self.area.sx
+
                 #let the event be treated by other areas
                 return event
-                
+
+            #handle scroll event
             if event["type"] == "scroll":
-                print(event_self.is_inside(event))
                 if event_self.is_inside(event):
                     self.scroll -= event["sy"]
                     if self.scroll > len(self.tiles) * 128 - self.area.sy + 32:
                         self.scroll = len(self.tiles) * 128 - self.area.sy + 32
                     if self.scroll < 0:
                         self.scroll = 0
+
+                    #consume the event
+                    return None
+
+            #see what tile was selected
+            if event["type"] == "release":
+                if event_self.is_inside(event):
+                    y = event["y"]
+                    self.select = int((self.area.sy - y + self.scroll)/128)
+                    if(self.select < 0):
+                        self.select = 0
+                    if(self.select >= len(self.tiles)):
+                        self.select = len(self.tiles)-1
 
                     #consume the event
                     return None
@@ -80,8 +100,14 @@ class tile_bar:
         #add the new tile to the rest
         self.tiles.append(tile)
 
-    def draw(self, selection = -1):
+    def get_selection(self):
+        if self.selection == -1:
+            return None
+
+        return self.tiles[self.selection]
+
+    def draw(self):
         for i in range(len(self.tiles)):
             self.tiles[i].draw(self.area.x, self.area.sy + self.scroll - (i+1)*128, 128)
-        self.selection.blit(self.area.x, self.area.sy + self.scroll - selection*128)
+        self.selection.blit(self.area.x, self.area.sy + self.scroll - (self.select+1)*128)
         self.button.blit(self.area.x, 0)
