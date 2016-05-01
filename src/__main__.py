@@ -1,7 +1,6 @@
 from pyglet.gl import *
 import pyglet
 import setup
-from random import randint
 app_window = pyglet.window.Window(resizable = True)
 setup.setup(app_window)
 

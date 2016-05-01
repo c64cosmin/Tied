@@ -2,10 +2,16 @@ import pyglet
 from pyglet.gl import *
 import ui
 import sys
+import menu
 def setup(window):
     window.window_area = ui.area(0, 0, 800, 600)
+    window.tile_bar = menu.tile_bar()
+    #add the tile bar to the window
+    window.window_area.add_child(window.tile_bar.area)
     @window.window_area.set_handle_event
     def handle_event(self, event):
+        if event is None:
+            return event
         print(self.x)
         print(self.y)
         print(self.sx)
@@ -14,10 +20,13 @@ def setup(window):
         print(event["y"])
         print(event["type"])
         sys.stdout.flush()
+
+        return event
     @window.event
     def on_draw():
         glClearColor(0, 0, 0, 255)
         window.clear()
+        window.tile_bar.draw()
 
 
     @window.event
@@ -28,9 +37,12 @@ def setup(window):
 
     @window.event
     def on_resize(width, height):
-        window.window_area.sx = width
-        window.window_area.sy = height
+        event = {}
+        event["x"] = width
+        event["y"] = height
+        event["type"] = "resize"
 
+        window.window_area.propagate_event(event)
 
     @window.event
     def on_mouse_motion(x, y, dx, dy):
@@ -74,3 +86,16 @@ def setup(window):
 
         window.window_area.propagate_event(event)
 
+
+    @window.event
+    def on_mouse_scroll(x, y, scroll_x, scroll_y):
+        event = {}
+        print(scroll_x)
+        print(scroll_y)
+        event["x"] = x
+        event["y"] = y
+        event["sx"] = scroll_x
+        event["sy"] = scroll_y
+        event["type"] = "scroll"
+
+        window.window_area.propagate_event(event)

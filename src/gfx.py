@@ -59,7 +59,7 @@ class tile:
 
         self.dirty = False
 
-    def draw(self, x, y, pixel_size):
+    def draw(self, x, y, size):
         self.update()
-        self.image.blit(x = x, y = y, width = pixel_size * self.size, height = pixel_size * self.size)
+        self.image.blit(x = x, y = y, width = size, height = size)
 
