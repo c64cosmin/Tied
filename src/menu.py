@@ -3,6 +3,7 @@ import gfx
 import map
 import ui
 from random import randint
+from math import floor
 
 #this class defines all the right side tile bar
 #including the addition of new tiles, cloning them
@@ -128,6 +129,13 @@ class tile_bar:
 class draw_area:
     def __init__(self):
         self.map = map.test_map()
+        #scroll for the test map
+        self.scroll_x = 0
+        self.scroll_y = 0
+        #does the test map have at least one tile
+        self.initiated = False
+        #pixel size for the map
+        self.zoom = 4
 
         self.area = ui.area(0,0, 800,600)
 
@@ -137,12 +145,50 @@ class draw_area:
                 return event
 
             #see if the area was clicked
-            if event["type"] == "release":
+            if event["type"] == "release" or event["type"] == "drag":
+                #map coordinates
+                pos_x = floor((event["x"] - self.scroll_x)/(self.zoom * gfx.tile_size))
+                pos_y = floor((event["y"] - self.scroll_y)/(self.zoom * gfx.tile_size))
                 #it's always inside
                 #see if the button is the left one
                 if event["button"] == 1:
-                    self.map.add_tile(randint(0,10), randint(0,10), tile_bar.get_selection())
+                    if not self.initiated and tile_bar.get_selection() is not None:
+                        self.initiated = True
+                        self.scroll_x = event["x"]
+                        self.scroll_y = event["y"]
+                        pos_x = 0
+                        pos_y = 0
+                    self.map.add_tile(pos_x, pos_y, tile_bar.get_selection())
                     return None
+
+                if event["button"] == 4:
+                    self.map.delete_tile(pos_x, pos_y)
+                    return None
+
+            #drag the test map
+            if event["type"] == "drag":
+                if event["button"] == 2:
+                    self.scroll_x += event["dx"]
+                    self.scroll_y += event["dy"]
+
+                    return None
+
+            #zoom in zoom out
+            if event["type"] == "scroll":
+                old_zoom = self.zoom
+                self.zoom += event["sy"]
+
+                if(self.zoom < 1):
+                    self.zoom = 1
+
+                #must change scroll position with respect to the mouse position
+                dx = (self.scroll_x - event["x"]) / old_zoom
+                dy = (self.scroll_y - event["y"]) / old_zoom
+                #solve for scroll position
+                self.scroll_x = dx * self.zoom + event["x"]
+                self.scroll_y = dy * self.zoom + event["y"]
+
+                return None
 
             #did we resize
             if event["type"] == "resize":
@@ -155,4 +201,6 @@ class draw_area:
 
 
     def draw(self):
-        self.map.draw(0,0, 10)
+        self.map.draw(self.scroll_x, self.scroll_y, self.zoom)
+        if tile_bar.get_selection() is not None:
+            tile_bar.get_selection().draw(self.scroll_x, self.scroll_y, 10)

@@ -80,6 +80,8 @@ def setup(window):
         event = {}
         event["x"] = x
         event["y"] = y
+        event["dx"] = dx
+        event["dy"] = dy
         event["type"] = "drag"
         event["button"] = buttons
 
