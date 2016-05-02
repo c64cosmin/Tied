@@ -337,10 +337,45 @@ class color_picker:
 
         pyglet.graphics.draw(int(len(vertices)/2), pyglet.gl.GL_LINES, ('v2f', vertices), ('c3B', colors))
 
+
+    #draw the color preview
+    def draw_color_preview(self):
+        vertices = []
+        colors = []
+
+        vert = [[0,0], [1,0], [0,1], [1,0], [0,1], [1,1]]
+
+        def add_square(x, y, sx, sy, color):
+            for point in vert:
+                vertices.append(x + sx*point[0])
+                vertices.append(y + sy*point[1])
+
+                colors.append(color[0])
+                colors.append(color[1])
+                colors.append(color[2])
+
+        color = self.get_color();
+
+        #black background square
+        add_square(0, self.area.sx, self.area.sx/2, 40, [0,0,0])
+        #white background square
+        add_square(self.area.sx/2, self.area.sx, self.area.sx/2, 40, [255,255,255])
+
+        #preview
+        add_square(10, self.area.sx+10, self.area.sx/2-20, 40-20, color)
+        add_square(self.area.sx/2+10, self.area.sx+10, self.area.sx/2-20, 40-20, color)
+
+        #big preview
+        add_square(0, self.area.sx+40, self.area.sx, 40, color)
+
+        pyglet.graphics.draw(int(len(vertices)/2), pyglet.gl.GL_TRIANGLES, ('v2f', vertices), ('c3B', colors))
+
+
     def update_color(self):
-        self.color = colorsys.hsv_to_rgb(self.hue_angle/360, self.saturation, self.value)
+        color = colorsys.hsv_to_rgb(self.hue_angle/360, self.saturation, self.value)
         for i in range(3):
-            self.color[i] = int(self.color[i]*255)
+            self.color[i] = int(color[i]*255)
+
 
     def set_color(self, color):
         new_values = colorsys.rgb_to_hsv(color[0]/255, color[1]/255, color[2]/255)
@@ -349,12 +384,15 @@ class color_picker:
         self.value = new_values[2]
         self.color = color
 
+
     def get_color(self):
         self.update_color()
         return self.color
+
 
     def draw(self):
         self.color_wheel.draw(pyglet.gl.GL_TRIANGLE_STRIP)
 
         self.draw_hue_angle()
         self.draw_pick_square()
+        self.draw_color_preview()
