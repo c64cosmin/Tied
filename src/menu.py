@@ -235,6 +235,7 @@ class color_picker:
         self.value = 0
 
         self.color = [0,0,0]
+        self.old_color = [0,0,0]
 
 
     #helper class, converts the event to color HSV parameters
@@ -439,7 +440,7 @@ class color_picker:
                 colors.append(color[1])
                 colors.append(color[2])
 
-        color = self.get_color();
+        self.update_color()
 
         #black background square
         add_square(0, self.area.sx, self.area.sx/2, 40, [0,0,0])
@@ -447,11 +448,12 @@ class color_picker:
         add_square(self.area.sx/2, self.area.sx, self.area.sx/2, 40, [255,255,255])
 
         #preview
-        add_square(10, self.area.sx+10, self.area.sx/2-20, 40-20, color)
-        add_square(self.area.sx/2+10, self.area.sx+10, self.area.sx/2-20, 40-20, color)
+        add_square(10, self.area.sx+10, self.area.sx/2-20, 40-20, self.color)
+        add_square(self.area.sx/2+10, self.area.sx+10, self.area.sx/2-20, 40-20, self.color)
 
         #big preview
-        add_square(0, self.area.sx+40, self.area.sx, 40, color)
+        add_square(0, self.area.sx+40, self.area.sx, 40, self.old_color)
+        add_square(0, self.area.sx+80, self.area.sx, 40, self.color)
 
         pyglet.graphics.draw(int(len(vertices)/2), pyglet.gl.GL_TRIANGLES, ('v2f', vertices), ('c3B', colors))
 
@@ -468,6 +470,10 @@ class color_picker:
         self.saturation = new_values[1]
         self.value = new_values[2]
         self.color = color
+
+
+    def set_old_color(self, color):
+        self.old_color = color
 
 
     def get_color(self):
