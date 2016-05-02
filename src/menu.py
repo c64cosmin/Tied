@@ -228,6 +228,10 @@ class color_picker:
         #indicator circle for the hue angle
         self.circle = pyglet.image.load("img/circle16.png")
 
+        #saturation and value indicator values
+        self.saturation = 0
+        self.value = 0
+
 
     #creates a color wheel
     def make_color_wheel(self):
@@ -286,10 +290,57 @@ class color_picker:
 
         pyglet.graphics.draw(int(len(vertices)/2), pyglet.gl.GL_TRIANGLE_STRIP, ('v2f', vertices), ('c3B', colors))
 
+        #draw the picking square indicator
+        vertices = []
+        colors = []
+
+        lines = [1, -1]
+        for add in lines:
+            #horizontal
+            vertices.append(x)
+            vertices.append(x + s*self.value + add)
+
+            vertices.append(x+s)
+            vertices.append(x + s*self.value + add)
+
+            #vertical
+            vertices.append(x + s*self.saturation + add)
+            vertices.append(x)
+
+            vertices.append(x + s*self.saturation + add)
+            vertices.append(x+s)
+
+        #for each vertex add one black color (i.e three zeros)
+        for t in range(int(len(vertices)/2) * 3):
+            colors.append(0)
+
+        #horizontal
+        vertices.append(x)
+        vertices.append(x + s*self.value)
+
+        vertices.append(x+s)
+        vertices.append(x + s*self.value)
+
+        #vertical
+        vertices.append(x + s*self.saturation)
+        vertices.append(x)
+
+        vertices.append(x + s*self.saturation)
+        vertices.append(x+s)
+
+        #for the rest of 4 vertices add the color white
+        for t in range(4):
+            for i in range(3):
+                colors.append(255)
+
+        pyglet.graphics.draw(int(len(vertices)/2), pyglet.gl.GL_LINES, ('v2f', vertices), ('c3B', colors))
+
 
     def draw(self):
         self.color_wheel.draw(pyglet.gl.GL_TRIANGLE_STRIP)
 
         self.hue_angle = randint(0,360)
+        self.saturation = randint(0,100)/100
+        self.value = randint(0,100)/100
         self.draw_hue_angle()
         self.draw_pick_square()
