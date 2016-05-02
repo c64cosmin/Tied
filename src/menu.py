@@ -44,6 +44,7 @@ class tile_bar:
                     #is the button released the left one
                     if event["button"] == 1:
                         self.add_new_tile()
+
                         #consume the event
                         return None
 
@@ -82,9 +83,6 @@ class tile_bar:
                     if self.scroll < 0:
                         self.scroll = 0
 
-                    #consume the event
-                    return None
-
             #see what tile was selected
             if event["type"] == "release":
                 #see if the click was made inside the area
@@ -98,8 +96,9 @@ class tile_bar:
                         if(tile_bar.select >= len(self.tiles)):
                             tile_bar.select = len(self.tiles)-1
 
-                        #consume the event
-                        return None
+            #consume any event if it's inside the tile bar
+            if area_self.is_inside(event):
+                return None
 
             #return other event to be treated by other areas
             return event
@@ -166,7 +165,7 @@ class draw_area:
                     self.scroll_y += event["dy"]
 
                     #event is consumed
-                    return True
+                    return None
 
             #zoom in zoom out
             if event["type"] == "scroll":
@@ -608,10 +607,13 @@ class edit_button:
                     else:
                         edit_button.state = "placing"
 
-                    return None
-
             if event["type"] == "resize":
                 self.area.y = event["y"] - 32
+                return event
+
+            #consume all the events inside the button
+            if area_self.is_inside(event):
+               return None
 
             return event
 
