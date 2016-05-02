@@ -187,29 +187,30 @@ class draw_area:
 
     def tile_editing_event(self, event):
         if event["type"] == "release" or event["type"] == "drag":
-            #map coordinates
-            pos_x = floor((event["x"] - self.scroll_x)/(self.zoom * gfx.tile_size))
-            pos_y = floor((event["y"] - self.scroll_y)/(self.zoom * gfx.tile_size))
+            if event["button"] == 1:
+                #map coordinates
+                pos_x = floor((event["x"] - self.scroll_x)/(self.zoom * gfx.tile_size))
+                pos_y = floor((event["y"] - self.scroll_y)/(self.zoom * gfx.tile_size))
 
-            #get the tile
-            tile = self.map.get_tile(pos_x, pos_y)
+                #get the tile
+                tile = self.map.get_tile(pos_x, pos_y)
 
-            if tile is not None:
-                #pixel coordinates
-                tile_x = self.scroll_x + pos_x * self.zoom * gfx.tile_size
-                tile_y = self.scroll_y + pos_y * self.zoom * gfx.tile_size
+                if tile is not None:
+                    #pixel coordinates
+                    tile_x = self.scroll_x + pos_x * self.zoom * gfx.tile_size
+                    tile_y = self.scroll_y + pos_y * self.zoom * gfx.tile_size
 
-                pix_x = floor((event["x"] - tile_x)/self.zoom)
-                pix_y = floor((event["y"] - tile_y)/self.zoom)
+                    pix_x = floor((event["x"] - tile_x)/self.zoom)
+                    pix_y = floor((event["y"] - tile_y)/self.zoom)
 
-                color = color_picker.instance.get_color()
-                rgba_color = [color[0], color[1], color[2], 255]
+                    color = color_picker.instance.get_color()
+                    rgba_color = [color[0], color[1], color[2], 255]
 
-                tile.set_pixel(pix_x, pix_y, rgba_color)
-                color_picker.instance.set_old_color(color)
+                    tile.set_pixel(pix_x, pix_y, rgba_color)
+                    color_picker.instance.set_old_color(color)
 
-                #consume event
-                return True
+                    #consume event
+                    return True
 
         return False
 
@@ -342,19 +343,20 @@ class color_picker:
 
             if event["type"] == "press":
                 if area_self.is_inside(event):
-                    self.dirty = True
+                    if event["button"] == 1:
+                        self.dirty = True
 
-                    #distance between mouse and center of the wheel
-                    dist = hypot(self.area.sx/2 - event["x"], self.area.sx/2 - event["y"])
+                        #distance between mouse and center of the wheel
+                        dist = hypot(self.area.sx/2 - event["x"], self.area.sx/2 - event["y"])
 
-                    #is the press on the circle or the square
-                    self.wheel_area = "square"
-                    if(dist > self.min_rad * self.area.sx):
-                        self.wheel_area = "circle"
+                        #is the press on the circle or the square
+                        self.wheel_area = "square"
+                        if(dist > self.min_rad * self.area.sx):
+                            self.wheel_area = "circle"
 
-                    self.mouse_to_color(event)
-                    #the event was consumed
-                    return None
+                        self.mouse_to_color(event)
+                        #the event was consumed
+                        return None
 
             #are we selecting a color
             if event["type"] == "drag":
@@ -530,7 +532,8 @@ class color_picker:
 
 
     def set_old_color(self, color):
-        self.old_color = color
+        for i in range(3):
+            self.old_color[i] = color[i]
 
 
     def get_color(self):

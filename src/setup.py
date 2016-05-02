@@ -6,7 +6,7 @@ from random import randint
 def setup(window):
     window.window_area = ui.area(0, 0, 800, 600)
     @window.window_area.set_handle_event
-    def handle_event(self, event):
+    def handle_event(area_self, event):
         if event is None:
             return event
         return event
