@@ -77,7 +77,7 @@ class tile_bar:
             #handle scroll event
             if event["type"] == "scroll":
                 if area_self.is_inside(event):
-                    self.scroll -= event["sy"]
+                    self.scroll -= event["sy"] * 20
                     if self.scroll > len(self.tiles) * 128 - self.area.sy + 32:
                         self.scroll = len(self.tiles) * 128 - self.area.sy + 32
                     if self.scroll < 0:
