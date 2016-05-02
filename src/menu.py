@@ -2,8 +2,13 @@ import pyglet
 import gfx
 import map
 import ui
+from pyglet.gl import *
 from random import randint
 from math import floor
+from math import cos
+from math import sin
+from math import pi
+import colorsys
 
 #this class defines all the right side tile bar
 #including the addition of new tiles, cloning them
@@ -204,3 +209,87 @@ class draw_area:
         self.map.draw(self.scroll_x, self.scroll_y, self.zoom)
         if tile_bar.get_selection() is not None:
             tile_bar.get_selection().draw(self.scroll_x, self.scroll_y, 10)
+
+
+
+#this class defines a color picker
+class color_picker:
+    def __init__(self):
+        #the clickable area for the color picker
+        self.area = ui.area(0,0, 200, 200)
+
+        #outer&inner radiuses for the color wheel
+        self.max_rad = 0.5
+        self.min_rad = 0.4
+        #the color picker vertex buffer
+        self.color_wheel = self.make_color_wheel()
+        #the hue angle
+        self.hue_angle = 0
+        #indicator circle for the hue angle
+        self.circle = pyglet.image.load("img/circle16.png")
+
+
+    #creates a color wheel
+    def make_color_wheel(self):
+        vertices = []
+        colors = []
+        for angle in range(0, 370, 10):
+            x = cos(angle*pi/180)*self.area.sx*self.max_rad + self.area.sx/2
+            y = sin(angle*pi/180)*self.area.sx*self.max_rad + self.area.sx/2
+            vertices.append(x)
+            vertices.append(y)
+            x = cos(angle*pi/180)*self.area.sx*self.min_rad + self.area.sx/2
+            y = sin(angle*pi/180)*self.area.sx*self.min_rad + self.area.sx/2
+            vertices.append(x)
+            vertices.append(y)
+            color = colorsys.hsv_to_rgb(angle/360, 1.0, 1.0)
+            for t in range(2):
+                for i in range(3):
+                    colors.append(int(color[i]*255))
+        color_wheel = pyglet.graphics.vertex_list(int(len(vertices)/2), ('v2f', vertices), ('c3B', colors))
+        return color_wheel
+
+
+    #draws the hue angle indicator
+    def draw_hue_angle(self):
+        x = cos(self.hue_angle*pi/180)*self.area.sx*(self.max_rad+self.min_rad)/2 + self.area.sx/2
+        y = sin(self.hue_angle*pi/180)*self.area.sx*(self.max_rad+self.min_rad)/2 + self.area.sx/2
+
+        x = int(x)
+        y = int(y)
+
+        self.circle.blit(x-8, y-8)
+
+
+    #draw the picking square
+    def draw_pick_square(self):
+        vertices = []
+        colors = []
+
+        x = cos(pi*3/4)*self.area.sx*self.min_rad + self.area.sx/2
+
+        s = (cos(pi/4)-cos(pi*3/4))*self.area.sx*self.min_rad
+
+        vert = [[0,0], [0,1], [1,0], [1,1]]
+
+        for x_pos in range(10):
+            for y_pos in range(10):
+                for point in vert:
+                    xp = (x_pos+point[0])/10
+                    yp = (y_pos+point[1])/10
+                    vertices.append(x + s*xp)
+                    vertices.append(x + s*yp)
+
+                    color = colorsys.hsv_to_rgb(self.hue_angle/360, xp, yp)
+                    for i in range(3):
+                        colors.append(int(color[i]*255))
+
+        pyglet.graphics.draw(int(len(vertices)/2), pyglet.gl.GL_TRIANGLE_STRIP, ('v2f', vertices), ('c3B', colors))
+
+
+    def draw(self):
+        self.color_wheel.draw(pyglet.gl.GL_TRIANGLE_STRIP)
+
+        self.hue_angle = randint(0,360)
+        self.draw_hue_angle()
+        self.draw_pick_square()
