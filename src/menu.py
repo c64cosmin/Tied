@@ -151,33 +151,8 @@ class draw_area:
             if event is None:
                 return event
 
-            #see if the area was clicked
-            if event["type"] == "release" or event["type"] == "drag":
-                #map coordinates
-                pos_x = floor((event["x"] - self.scroll_x)/(self.zoom * gfx.tile_size))
-                pos_y = floor((event["y"] - self.scroll_y)/(self.zoom * gfx.tile_size))
-                #it's always inside
-                #see if the button is the left one
-                if event["button"] == 1:
-                    if not self.initiated and tile_bar.get_selection() is not None:
-                        self.initiated = True
-                        self.scroll_x = event["x"]
-                        self.scroll_y = event["y"]
-                        pos_x = 0
-                        pos_y = 0
-                    self.map.add_tile(pos_x, pos_y, tile_bar.get_selection())
-                    return None
-
-                if event["button"] == 4:
-                    self.map.delete_tile(pos_x, pos_y)
-                    return None
-
-            #drag the test map
-            if event["type"] == "drag":
-                if event["button"] == 2:
-                    self.scroll_x += event["dx"]
-                    self.scroll_y += event["dy"]
-
+            if edit_button.state == "placing":
+                if self.tile_placing_event(event):
                     return None
 
             #zoom in zoom out
@@ -207,10 +182,46 @@ class draw_area:
             return event
 
 
+    def tile_placing_event(self, event):
+        #see if the area was clicked
+        if event["type"] == "release" or event["type"] == "drag":
+            #map coordinates
+            pos_x = floor((event["x"] - self.scroll_x)/(self.zoom * gfx.tile_size))
+            pos_y = floor((event["y"] - self.scroll_y)/(self.zoom * gfx.tile_size))
+            #it's always inside
+            #see if the button is the left one
+            if event["button"] == 1:
+                if not self.initiated and tile_bar.get_selection() is not None:
+                    self.initiated = True
+                    self.scroll_x = event["x"]
+                    self.scroll_y = event["y"]
+                    pos_x = 0
+                    pos_y = 0
+                self.map.add_tile(pos_x, pos_y, tile_bar.get_selection())
+
+                #event is consumed
+                return True
+
+            if event["button"] == 4:
+                self.map.delete_tile(pos_x, pos_y)
+
+                #event is consumed
+                return True
+
+        #drag the test map
+        if event["type"] == "drag":
+            if event["button"] == 2:
+                self.scroll_x += event["dx"]
+                self.scroll_y += event["dy"]
+
+                #event is consumed
+                return True
+        
+        return False
+
+
     def draw(self):
         self.map.draw(self.scroll_x, self.scroll_y, self.zoom)
-        if tile_bar.get_selection() is not None:
-            tile_bar.get_selection().draw(self.scroll_x, self.scroll_y, 10)
 
 
 
@@ -487,3 +498,39 @@ class color_picker:
         self.draw_hue_angle()
         self.draw_pick_square()
         self.draw_color_preview()
+
+
+
+#class to hold the editor state (placement/editing)
+class edit_button:
+    state = "placing"
+    def __init__(self):
+        self.editing = pyglet.image.load("img/editing.png")
+        self.placing = pyglet.image.load("img/placing.png")
+
+        self.area = ui.area(0, 600-32, 128,32)
+        @self.area.set_handle_event
+        def handle_event(area_self, event):
+            if event is None:
+                return event
+
+            if event["type"] == "release":
+                if area_self.is_inside(event):
+                    if edit_button.state == "placing":
+                        edit_button.state = "editing"
+                    else:
+                        edit_button.state = "placing"
+
+                    return None
+
+            if event["type"] == "resize":
+                self.area.y = event["y"] - 32
+
+            return event
+
+
+    def draw(self):
+        if edit_button.state == "placing":
+            self.placing.blit(self.area.x, self.area.y)
+        if edit_button.state == "editing":
+            self.editing.blit(self.area.x, self.area.y)

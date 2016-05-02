@@ -23,6 +23,10 @@ def setup(window):
     window.tile_bar = menu.tile_bar()
     window.draw_area.area.add_child(window.tile_bar.area)
 
+    #add the editing switch button
+    window.editing_button = menu.edit_button()
+    window.draw_area.area.add_child(window.editing_button.area)
+
 
     @window.event
     def on_draw():
@@ -31,6 +35,7 @@ def setup(window):
         window.draw_area.draw()
         window.tile_bar.draw()
         window.color_picker.draw()
+        window.editing_button.draw()
 
 
     @window.event
