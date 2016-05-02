@@ -232,6 +232,8 @@ class color_picker:
         self.saturation = 0
         self.value = 0
 
+        self.color = [0,0,0]
+
 
     #creates a color wheel
     def make_color_wheel(self):
@@ -335,12 +337,24 @@ class color_picker:
 
         pyglet.graphics.draw(int(len(vertices)/2), pyglet.gl.GL_LINES, ('v2f', vertices), ('c3B', colors))
 
+    def update_color(self):
+        self.color = colorsys.hsv_to_rgb(self.hue_angle/360, self.saturation, self.value)
+        for i in range(3):
+            self.color[i] = int(self.color[i]*255)
+
+    def set_color(self, color):
+        new_values = colorsys.rgb_to_hsv(color[0]/255, color[1]/255, color[2]/255)
+        self.hue_angle = new_values[0]*360
+        self.saturation = new_values[1]
+        self.value = new_values[2]
+        self.color = color
+
+    def get_color(self):
+        self.update_color()
+        return self.color
 
     def draw(self):
         self.color_wheel.draw(pyglet.gl.GL_TRIANGLE_STRIP)
 
-        self.hue_angle = randint(0,360)
-        self.saturation = randint(0,100)/100
-        self.value = randint(0,100)/100
         self.draw_hue_angle()
         self.draw_pick_square()

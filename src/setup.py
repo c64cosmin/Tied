@@ -2,6 +2,7 @@ import pyglet
 from pyglet.gl import *
 import ui
 import menu
+from random import randint
 def setup(window):
     window.window_area = ui.area(0, 0, 800, 600)
     @window.window_area.set_handle_event
@@ -27,6 +28,7 @@ def setup(window):
         window.clear()
         window.draw_area.draw()
         window.tile_bar.draw()
+        window.color_picker.set_color([randint(0,255),randint(0,255),randint(0,255)])
         window.color_picker.draw()
 
 
