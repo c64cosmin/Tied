@@ -208,6 +208,28 @@ class draw_area:
                     #consume event
                     return True
 
+            #pick color event
+            if event["button"] == 4:
+                #map coordinates
+                pos = self.get_mouse_tile_pos(event)
+
+                #get the tile
+                tile = self.map.get_tile(pos[0], pos[1])
+
+                if tile is not None:
+                    #pixel coordinates
+                    pix = self.get_mouse_pixel_pos(event)
+
+                    tile_color = tile.get_pixel(pix[0], pix[1])
+
+                    color = color_picker.instance.get_color()
+                    color_picker.instance.set_old_color(color)
+
+                    color_picker.instance.set_color(tile_color[0:3])
+
+                    #consume event
+                    return True
+
         return False
 
 
