@@ -187,26 +187,22 @@ class draw_area:
 
     def tile_editing_event(self, event):
         if event["type"] == "release" or event["type"] == "drag":
+            #place color event
             if event["button"] == 1:
                 #map coordinates
-                pos_x = floor((event["x"] - self.scroll_x)/(self.zoom * gfx.tile_size))
-                pos_y = floor((event["y"] - self.scroll_y)/(self.zoom * gfx.tile_size))
+                pos = self.get_mouse_tile_pos(event)
 
                 #get the tile
-                tile = self.map.get_tile(pos_x, pos_y)
+                tile = self.map.get_tile(pos[0], pos[1])
 
                 if tile is not None:
                     #pixel coordinates
-                    tile_x = self.scroll_x + pos_x * self.zoom * gfx.tile_size
-                    tile_y = self.scroll_y + pos_y * self.zoom * gfx.tile_size
-
-                    pix_x = floor((event["x"] - tile_x)/self.zoom)
-                    pix_y = floor((event["y"] - tile_y)/self.zoom)
+                    pix = self.get_mouse_pixel_pos(event)
 
                     color = color_picker.instance.get_color()
                     rgba_color = [color[0], color[1], color[2], 255]
 
-                    tile.set_pixel(pix_x, pix_y, rgba_color)
+                    tile.set_pixel(pix[0], pix[1], rgba_color)
                     color_picker.instance.set_old_color(color)
 
                     #consume event
@@ -219,8 +215,7 @@ class draw_area:
         #see if the area was clicked
         if event["type"] == "release" or event["type"] == "drag":
             #map coordinates
-            pos_x = floor((event["x"] - self.scroll_x)/(self.zoom * gfx.tile_size))
-            pos_y = floor((event["y"] - self.scroll_y)/(self.zoom * gfx.tile_size))
+            pos = self.get_mouse_tile_pos(event)
             #it's always inside
             #see if the button is the left one
             if event["button"] == 1:
@@ -228,15 +223,14 @@ class draw_area:
                     self.initiated = True
                     self.scroll_x = event["x"]
                     self.scroll_y = event["y"]
-                    pos_x = 0
-                    pos_y = 0
-                self.map.add_tile(pos_x, pos_y, tile_bar.get_selection())
+                    pos = [0, 0]
+                self.map.add_tile(pos[0], pos[1], tile_bar.get_selection())
 
                 #event is consumed
                 return True
 
             if event["button"] == 4:
-                self.map.delete_tile(pos_x, pos_y)
+                self.map.delete_tile(pos[0], pos[1])
 
                 #event is consumed
                 return True
@@ -251,6 +245,28 @@ class draw_area:
                 return True
 
         return False
+
+
+    #returns the tile position under the mouse
+    def get_mouse_tile_pos(self, event):
+        #map coordinates
+        pos_x = floor((event["x"] - self.scroll_x)/(self.zoom * gfx.tile_size))
+        pos_y = floor((event["y"] - self.scroll_y)/(self.zoom * gfx.tile_size))
+
+        return [pos_x, pos_y]
+
+
+    #returns the pixel position under the mouse
+    def get_mouse_pixel_pos(self, event):
+        pos = self.get_mouse_tile_pos(event)
+        #pixel coordinates
+        tile_x = self.scroll_x + pos[0] * self.zoom * gfx.tile_size
+        tile_y = self.scroll_y + pos[1] * self.zoom * gfx.tile_size
+
+        pix_x = floor((event["x"] - tile_x)/self.zoom)
+        pix_y = floor((event["y"] - tile_y)/self.zoom)
+
+        return [pix_x, pix_y]
 
 
     def draw(self):
