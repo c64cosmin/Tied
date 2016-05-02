@@ -8,6 +8,8 @@ from math import floor
 from math import cos
 from math import sin
 from math import pi
+from math import hypot
+from math import atan2
 import colorsys
 
 #this class defines all the right side tile bar
@@ -31,14 +33,14 @@ class tile_bar:
         #an area for the button
         self.button_area = ui.area(800-128, 0, 128, 32)
         @self.button_area.set_handle_event
-        def handle_event(event_self, event):
+        def handle_event(area_self, event):
             if event is None:
                 return event
 
             #is the button clicked
             if event["type"] == "release":
                 #is the event inside the area
-                if event_self.is_inside(event):
+                if area_self.is_inside(event):
                     #is the button released the left one
                     if event["button"] == 1:
                         self.add_new_tile()
@@ -57,7 +59,7 @@ class tile_bar:
         self.area.add_child(self.button_area)
 
         @self.area.set_handle_event
-        def handle_event(event_self, event):
+        def handle_event(area_self, event):
             if event is None:
                 return event
             
@@ -73,7 +75,7 @@ class tile_bar:
 
             #handle scroll event
             if event["type"] == "scroll":
-                if event_self.is_inside(event):
+                if area_self.is_inside(event):
                     self.scroll -= event["sy"]
                     if self.scroll > len(self.tiles) * 128 - self.area.sy + 32:
                         self.scroll = len(self.tiles) * 128 - self.area.sy + 32
@@ -86,7 +88,7 @@ class tile_bar:
             #see what tile was selected
             if event["type"] == "release":
                 #see if the click was made inside the area
-                if event_self.is_inside(event):
+                if area_self.is_inside(event):
                     #is the button pressed the left one
                     if event["button"] == 1:
                         y = event["y"]
@@ -145,7 +147,7 @@ class draw_area:
         self.area = ui.area(0,0, 800,600)
 
         @self.area.set_handle_event
-        def handle_event(event_self, event):
+        def handle_event(area_self, event):
             if event is None:
                 return event
 
@@ -216,7 +218,7 @@ class draw_area:
 class color_picker:
     def __init__(self):
         #the clickable area for the color picker
-        self.area = ui.area(0,0, 200, 200)
+        self.setup_areas()
 
         #outer&inner radiuses for the color wheel
         self.max_rad = 0.5
@@ -233,6 +235,89 @@ class color_picker:
         self.value = 0
 
         self.color = [0,0,0]
+
+
+    #helper class, converts the event to color HSV parameters
+    def mouse_to_color(self, event):
+        if self.wheel_area == "circle":
+            angle = atan2(event["y"] - self.area.sx/2, event["x"] - self.area.sx/2)
+            angle = angle/pi*180
+            angle += 360
+
+            self.hue_angle = angle
+
+            #consume the event
+            return True
+
+        if self.wheel_area == "square":
+            x = cos(pi*3/4)*self.area.sx*self.min_rad + self.area.sx/2
+
+            s = (cos(pi/4)-cos(pi*3/4))*self.area.sx*self.min_rad
+
+            pos_x = event["x"] - x
+            pos_y = event["y"] - x
+            pos_x /= s
+            pos_y /= s
+
+            if pos_x < 0:
+                pos_x = 0
+            if pos_x > 1:
+                pos_x = 1
+            if pos_y < 0:
+                pos_y = 0
+            if pos_y > 1:
+                pos_y = 1
+
+            self.saturation = pos_x
+            self.value = pos_y
+
+            #consume the event
+            return True
+
+        return False
+
+
+    #setup the ui areas
+    def setup_areas(self):
+        #area for the color wheel
+        self.area = ui.area(0,0, 200, 200)
+
+        #holds the last clicked area(the circle or the square)
+        self.wheel_area = "none"
+
+        @self.area.set_handle_event
+        def handle_event(area_self, event):
+            if event is None:
+                return event
+
+            if event["type"] == "press":
+                if area_self.is_inside(event):
+                    #distance between mouse and center of the wheel
+                    dist = hypot(self.area.sx/2 - event["x"], self.area.sx/2 - event["y"])
+
+                    #is the press on the circle or the square
+                    self.wheel_area = "square"
+                    if(dist > self.min_rad * self.area.sx):
+                        self.wheel_area = "circle"
+
+                    self.mouse_to_color(event)
+                    #the event was consumed
+                    return None
+
+            #are we selecting a color
+            if event["type"] == "drag":
+                #is the left button down
+                if event["button"] == 1:
+                    if self.mouse_to_color(event):
+                        return None
+
+            if event["type"] == "release":
+                if self.wheel_area != "none":
+                    self.wheel_area = "none"
+                    return None
+
+            #propagate the event
+            return event
 
 
     #creates a color wheel

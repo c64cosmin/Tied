@@ -11,6 +11,10 @@ def setup(window):
             return event
         return event
 
+    #add a color picker
+    window.color_picker = menu.color_picker()
+    window.window_area.add_child(window.color_picker.area)
+
     #add the drawing area to the window
     window.draw_area = menu.draw_area()
     window.window_area.add_child(window.draw_area.area)
@@ -19,8 +23,6 @@ def setup(window):
     window.tile_bar = menu.tile_bar()
     window.draw_area.area.add_child(window.tile_bar.area)
 
-    #add a color picker
-    window.color_picker = menu.color_picker()
 
     @window.event
     def on_draw():
@@ -28,7 +30,6 @@ def setup(window):
         window.clear()
         window.draw_area.draw()
         window.tile_bar.draw()
-        window.color_picker.set_color([randint(0,255),randint(0,255),randint(0,255)])
         window.color_picker.draw()
 
 
