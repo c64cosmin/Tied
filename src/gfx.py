@@ -24,6 +24,10 @@ class tile:
 
     #set a pixel color [r,g,b,a] at position x, y
     def set_pixel(self, x, y, color):
+        #test if inside the tile
+        if x < 0 or y < 0 or x >= tile_size or y >= tile_size:
+            return
+
         #calculate the offset for the pixel that we want to change
         pos = (x + y * self.size) * 4
         #change accordingly
@@ -34,6 +38,10 @@ class tile:
 
     #get a pixel color [r,g,b,a] at position x, y
     def get_pixel(self, x, y):
+        #test if inside the tile
+        if x < 0 or y < 0 or x >= tile_size or y >= tile_size:
+            return [0,0,0,0]
+
         #create the array for the pixel
         pixel = [0,0,0,0]
         #calculate the offset for the pixel that we want to sample

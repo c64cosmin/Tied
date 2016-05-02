@@ -7,6 +7,7 @@ class test_map:
         #the map's purpose is just for testing
         self.tiles = []
 
+
     def add_tile(self, x, y, tile):
         #see if we got a valid tile
         if tile is None:
@@ -19,12 +20,23 @@ class test_map:
 
         self.tiles.append([tile, x, y])
 
+
     def delete_tile(self, x, y):
         #find the tile at position x,y
         for tile in self.tiles:
             if tile[1] == x and tile[2] == y:
                 self.tiles.remove(tile)
                 return
+
+
+    def get_tile(self, x, y):
+        #find the tile at position x,y
+        for tile in self.tiles:
+            if tile[1] == x and tile[2] == y:
+                return tile[0]
+
+        return None
+
 
     def draw(self, x, y, pixel_size):
         for tile in self.tiles:
