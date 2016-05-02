@@ -159,6 +159,15 @@ class draw_area:
                 if self.tile_editing_event(event):
                     return None
 
+            #drag the test map
+            if event["type"] == "drag":
+                if event["button"] == 2:
+                    self.scroll_x += event["dx"]
+                    self.scroll_y += event["dy"]
+
+                    #event is consumed
+                    return True
+
             #zoom in zoom out
             if event["type"] == "scroll":
                 old_zoom = self.zoom
@@ -253,15 +262,6 @@ class draw_area:
 
             if event["button"] == 4:
                 self.map.delete_tile(pos[0], pos[1])
-
-                #event is consumed
-                return True
-
-        #drag the test map
-        if event["type"] == "drag":
-            if event["button"] == 2:
-                self.scroll_x += event["dx"]
-                self.scroll_y += event["dy"]
 
                 #event is consumed
                 return True
